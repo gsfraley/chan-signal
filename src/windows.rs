@@ -32,12 +32,8 @@ unsafe extern "system" fn ctrl_handler(ctrl_type: DWORD) -> BOOL {
 
     let subs = HANDLERS.lock().unwrap();
     for (s, sigs) in subs.iter() {
-        if !sigs.contains(&sig) {
-            continue;
-        }
-        chan_select! {
-            default => {},
-            s.send(sig) => {},
+        if sigs.contains(&sig) {
+            s.send(sig);
         }
     }
 
