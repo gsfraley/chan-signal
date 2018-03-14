@@ -108,7 +108,7 @@ additions may be warranted:
 * Support Windows.
 */
 #![deny(missing_docs)]
-#![allow(unused_imports)]
+#![allow(unused_imports)] // TODO: Remove
 
 extern crate bit_set;
 #[macro_use] extern crate chan;
