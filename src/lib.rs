@@ -108,6 +108,7 @@ additions may be warranted:
 * Support Windows.
 */
 #![deny(missing_docs)]
+#![allow(unused_imports)]
 
 extern crate bit_set;
 #[macro_use] extern crate chan;

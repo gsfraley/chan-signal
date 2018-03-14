@@ -1,3 +1,4 @@
+use libc;
 use libc::{
     // POSIX.1-2008, minus SIGPOLL (not in some BSD, use SIGIO)
     SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE, SIGKILL,
@@ -15,6 +16,17 @@ use libc::{
 };
 use libc::kill;
 use libc::getpid;
+
+use std::collections::HashMap;
+use std::io;
+use std::mem;
+use std::ptr;
+use std::sync::Mutex;
+use std::thread;
+
+use bit_set::BitSet;
+use chan::Sender;
+use super::Signal;
 
 lazy_static! {
     static ref HANDLERS: Mutex<HashMap<Sender<Signal>, BitSet>> = {
@@ -36,7 +48,7 @@ pub fn _notify_on(chan: &Sender<Signal>, signal: Signal) {
 
     // Make sure that the signal that we want notifications on is blocked
     // It does not matter if we block the same signal twice.
-    block(&[signal]);
+    _block(&[signal]);
 }
 
 #[doc(hidden)]
@@ -49,7 +61,7 @@ pub fn _block(signals: &[Signal]) {
 }
 
 #[doc(hidden)]
-pub fn block_all_subscribable() {
+pub fn _block_all_subscribable() {
     SigSet::subscribable().thread_block_signals().unwrap();
 }
 
@@ -88,11 +100,6 @@ fn init() {
     // similar may take down the process even though the main thread has blocked
     // the signal.
     saved_mask.thread_set_signal_mask().unwrap();
-}
-
-#[doc(hidden)]
-pub fn kill_this(sig: Signal) {
-    unsafe { kill(getpid(), sig.as_sig()); }
 }
 
 type Sig = libc::c_int;
